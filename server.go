@@ -37,35 +37,35 @@ func NewServer(name string) *Server {
 	}
 }
 
-func (t Tool[T]) AddToServer(s *Server) {
-	err := t.TryAddToServer(s)
+func AddToolToServer[T any](server *Server, tool Tool[T]) {
+	err := TryAddToolToServer(server, tool)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (t Tool[T]) TryAddToServer(s *Server) error {
-	t.Name = strings.TrimSpace(t.Name)
-	if t.Name == "" {
+func TryAddToolToServer[T any](server *Server, tool Tool[T]) error {
+	tool.Name = strings.TrimSpace(tool.Name)
+	if tool.Name == "" {
 		return errors.New("tool has no name")
 	}
 
-	t.Description = strings.TrimSpace(t.Description)
-	if t.Description == "" {
+	tool.Description = strings.TrimSpace(tool.Description)
+	if tool.Description == "" {
 		return errors.New("tool has no description")
 	}
 
 	inputSchema := (&jsonschema.Reflector{
 		DoNotReference: true,
-	}).Reflect(t.args)
+	}).Reflect(tool.args)
 
-	if t.Handler == nil {
+	if tool.Handler == nil {
 		return errors.New("tool has no handler")
 	}
 
-	s.tools = append(s.tools, internalToolT{
-		Name:        t.Name,
-		Description: t.Description,
+	server.tools = append(server.tools, internalToolT{
+		Name:        tool.Name,
+		Description: tool.Description,
 		InputSchema: inputSchema,
 		Handler: func(rawArguments json.RawMessage) (any, error) {
 			var arguments T
@@ -74,7 +74,7 @@ func (t Tool[T]) TryAddToServer(s *Server) error {
 				return nil, err
 			}
 
-			return t.Handler(arguments)
+			return tool.Handler(arguments)
 		},
 	})
 	return nil
