@@ -17,14 +17,14 @@ Not only do we have go set go variables locally when we want to setup a project 
 
 ```go
 // Setup server
-server := mcp.NewServer("Example server")
+mcpServer := mcp.NewServer("Example server")
 
 type HelloWorldRequest struct {
 	// github.com/invopop/jsonschema is used to generate the schema
 	Name string `json:"name" jsonschema:"required" description:"The name of the person to greet"`
 }
 
-mcp.AddToolToServer(server, mcp.Tool[HelloWorldRequest]{
+mcp.AddToolToServer(mcpServer, mcp.Tool[HelloWorldRequest]{
 	Name:        "hello_world",
 	Description: "Example tool for server",
 	Handler:     func(args HelloWorldRequest) (any, error) {
@@ -33,6 +33,24 @@ mcp.AddToolToServer(server, mcp.Tool[HelloWorldRequest]{
 })
 
 // Inside a http request to the mcp route
-response := server.Handle(method /* string */, body /* []byte */)
+response := mcpServer.Handle(method /* string */, body /* []byte */)
 fmt.Printf("%+v\n", response)
+```
+
+### http server handler example
+
+```go
+http.HandleFunc("/mcp", func(w http.ResponseWriter, r *http.Request) {
+	// Read the body
+	defer r.Body.Close()
+	requestBody, _ := io.ReadAll(r.Body)
+
+	// Let the mcp server handle the request
+	response := mcpServer.Handle(r.Method, requestBody)
+
+	// Respond with the payload of the mcp server
+	w.Header().Set("Content-Type", response.ContentType)
+	w.WriteHeader(response.Status)
+	w.Write(response.Payload)
+})
 ```
