@@ -18,16 +18,13 @@ var emptyResponse = Response{
 }
 
 func jsonResponse(res any) Response {
-	payloadJson, err := json.Marshal(Res{
-		Jsonrpc: Jsonrpc,
-		Result:  res,
-	})
+	payloadJson, err := json.Marshal(res)
 	if err != nil {
 		return errorResponse(err)
 	}
 
 	return Response{
-		Status:      400,
+		Status:      200,
 		ContentType: "application/json",
 		Payload:     payloadJson,
 	}

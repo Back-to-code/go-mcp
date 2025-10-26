@@ -24,11 +24,11 @@ type HelloWorldRequest struct {
 	Name string `json:"name" jsonschema:"required" description:"The name of the person to greet"`
 }
 
-mcp.AddToolToServer(s, Tool{
+mcp.AddToolToServer(server, mcp.Tool[HelloWorldRequest]{
 	Name:        "hello_world",
 	Description: "Example tool for server",
 	Handler:     func(args HelloWorldRequest) (any, error) {
-		return "Hello " + args.Name
+		return "Hello " + args.Name, nil
 	},
 })
 
