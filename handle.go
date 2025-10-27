@@ -2,13 +2,18 @@ package mcp
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
 )
 
-func (s *Server) Handle(method string, body []byte) Response {
+func (s *Server) Handle(method string, body []byte, ctx context.Context) Response {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	switch method {
 	case "GET":
 		return Response{
@@ -17,7 +22,7 @@ func (s *Server) Handle(method string, body []byte) Response {
 			Payload:     []byte("Ok"),
 		}
 	case "POST", "PATCH", "PUT":
-		return s.handleStreamableHttpRequest(body)
+		return s.handleStreamableHttpRequest(body, ctx)
 	default:
 		return Response{
 			Status:      404,
@@ -27,7 +32,7 @@ func (s *Server) Handle(method string, body []byte) Response {
 	}
 }
 
-func (s *Server) handleStreamableHttpRequest(body []byte) Response {
+func (s *Server) handleStreamableHttpRequest(body []byte, ctx context.Context) Response {
 	body = bytes.TrimSpace(body)
 	if len(body) == 0 {
 		return emptyResponse
@@ -70,6 +75,11 @@ outer:
 			}
 			resp = append(resp, res)
 			return res
+		}
+
+		if ctx.Err() != nil {
+			addErr(ctx.Err())
+			continue
 		}
 
 		switch req.Method {
@@ -128,7 +138,7 @@ outer:
 				continue
 			}
 
-			out, err := pickedTool.Handler(params.Arguments)
+			out, err := pickedTool.Handler(params.Arguments, ctx)
 			if err != nil {
 				addResp(newToolResponse(true, err.Error()))
 				continue

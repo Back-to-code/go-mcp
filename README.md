@@ -33,7 +33,7 @@ mcp.AddToolToServer(mcpServer, mcp.Tool[HelloWorldRequest]{
 })
 
 // Inside a http request to the mcp route
-response := mcpServer.Handle(method /* string */, body /* []byte */)
+response := mcpServer.Handle(method /* string */, body /* []byte */, context.Background())
 fmt.Printf("%+v\n", response)
 ```
 

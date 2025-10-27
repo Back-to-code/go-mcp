@@ -1,6 +1,7 @@
 package mcp
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -14,17 +15,17 @@ type Server struct {
 }
 
 type internalToolT struct {
-	Name        string                             `json:"name"`
-	Description string                             `json:"description"`
-	InputSchema *jsonschema.Schema                 `json:"inputSchema"`
-	Handler     func(json.RawMessage) (any, error) `json:"-"`
+	Name        string                                                            `json:"name"`
+	Description string                                                            `json:"description"`
+	InputSchema *jsonschema.Schema                                                `json:"inputSchema"`
+	Handler     func(arguments json.RawMessage, ctx context.Context) (any, error) `json:"-"`
 }
 
 type Tool[T any] struct {
 	// Required fields
 	Name        string
 	Description string
-	Handler     func(arguments T) (any, error)
+	Handler     func(arguments T, ctx context.Context) (any, error)
 
 	// Not required
 	args T
@@ -67,14 +68,14 @@ func TryAddToolToServer[T any](server *Server, tool Tool[T]) error {
 		Name:        tool.Name,
 		Description: tool.Description,
 		InputSchema: inputSchema,
-		Handler: func(rawArguments json.RawMessage) (any, error) {
+		Handler: func(rawArguments json.RawMessage, ctx context.Context) (any, error) {
 			var arguments T
 			err := json.Unmarshal(rawArguments, &arguments)
 			if err != nil {
 				return nil, err
 			}
 
-			return tool.Handler(arguments)
+			return tool.Handler(arguments, ctx)
 		},
 	})
 	return nil

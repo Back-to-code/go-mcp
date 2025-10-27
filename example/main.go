@@ -4,6 +4,7 @@ package main
 // go run example/main.go
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -22,7 +23,7 @@ func main() {
 	mcp.AddToolToServer(mcpServer, mcp.Tool[HelloWorldRequest]{
 		Name:        "hello_world",
 		Description: "Example tool for server",
-		Handler: func(args HelloWorldRequest) (any, error) {
+		Handler: func(args HelloWorldRequest, _ context.Context) (any, error) {
 			return "Hello " + args.Name, nil
 		},
 	})
@@ -33,7 +34,7 @@ func main() {
 		requestBody, _ := io.ReadAll(r.Body)
 
 		// Let the mcp server handle the request
-		response := mcpServer.Handle(r.Method, requestBody)
+		response := mcpServer.Handle(r.Method, requestBody, context.Background())
 
 		// Respond with the payload of the mcp server
 		w.Header().Set("Content-Type", response.ContentType)
