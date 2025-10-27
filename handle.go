@@ -162,7 +162,7 @@ outer:
 				addResp(newToolResponse(true, "returned value that cannot be converted to a string"))
 			default:
 				outJson, err := json.Marshal(out)
-				if err == nil {
+				if err != nil {
 					addResp(newToolResponse(true, err.Error()))
 				} else {
 					addResp(newToolResponse(false, string(outJson)))
