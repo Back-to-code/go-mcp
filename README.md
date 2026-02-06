@@ -9,7 +9,7 @@ This library currently only supports the [Streamable Http](https://modelcontextp
 DO NOT MAKE THIS REPO PRIVATE!
 
 This library is public so it can be easially imported by other private projects.
-Once this library is private it's a fuckload of work to import this package.
+Once this library is private it's quite a lot of work to import this package.
 
 Not only do we have go set go variables locally when we want to setup a project that makes use of this library but also in the pipelines and inside the docker containers.
 
