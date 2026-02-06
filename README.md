@@ -1,5 +1,3 @@
-# MOVED OVER TO https://github.com/Back-to-code/go-mcp
-
 # Go MCP
 
 A go library for easially adding an mcp server to an exsisting server.
