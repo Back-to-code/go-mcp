@@ -1,4 +1,4 @@
-module bitbucket.org/teamscript/go-mcp
+module github.com/Back-to-code/go-mcp
 
 go 1.25.2
 

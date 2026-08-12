@@ -10,7 +10,7 @@ import (
 	"log"
 	"net/http"
 
-	"bitbucket.org/teamscript/go-mcp"
+	"github.com/Back-to-code/go-mcp"
 )
 
 func main() {
