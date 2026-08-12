@@ -138,14 +138,14 @@ outer:
 				continue
 			}
 
-			out, err := pickedTool.Handler(params.Arguments, ctx)
+			out, err := pickedTool.Handler(params.Arguments, contextWithToolName(ctx, pickedTool.Name))
 			if err != nil {
 				addResp(newToolResponse(true, err.Error()))
 				continue
 			}
 
 			outReflection := reflect.ValueOf(out)
-			for outReflection.Kind() == reflect.Ptr {
+			for outReflection.Kind() == reflect.Pointer {
 				if outReflection.IsNil() {
 					addResp(newToolResponse(false, "null"))
 					continue outer

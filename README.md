@@ -37,6 +37,32 @@ response := mcpServer.Handle(method /* string */, body /* []byte */, context.Bac
 fmt.Printf("%+v\n", response)
 ```
 
+### Tool name inside a handler
+
+The context passed to a tool handler carries the name of the tool that was called.
+Use `mcp.ToolNameFromContext` to read it, this is handy when one handler is shared by
+multiple tools or for logging / tracing.
+
+```go
+mcp.AddToolToServer(mcpServer, mcp.Tool[HelloWorldRequest]{
+	Name:        "hello_world",
+	Description: "Example tool for server",
+	Handler: func(args HelloWorldRequest, ctx context.Context) (any, error) {
+		toolName, ok := mcp.ToolNameFromContext(ctx)
+		// toolName == "hello_world", ok == true
+
+		if !ok {
+			// The context did not come from a tool call
+		}
+
+		return "Hello " + args.Name + ", greeted by " + toolName, nil
+	},
+})
+```
+
+`ok` is `false` when the context does not originate from a tool handler, so the zero
+value `""` is never mistaken for a real tool name.
+
 ### http server handler example
 
 ```go
