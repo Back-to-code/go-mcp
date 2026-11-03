@@ -22,6 +22,7 @@ type Res struct {
 }
 
 type Error struct {
+	Code    int    `json:"code,omitempty"`
 	Message string `json:"message"`
 }
 

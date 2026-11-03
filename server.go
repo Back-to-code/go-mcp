@@ -10,8 +10,10 @@ import (
 )
 
 type Server struct {
-	name  string
-	tools []internalToolT
+	name         string
+	instructions string
+	tools        []internalToolT
+	resources    []internalResourceT
 }
 
 type internalToolT struct {
@@ -33,9 +35,16 @@ type Tool[T any] struct {
 
 func NewServer(name string) *Server {
 	return &Server{
-		name:  name,
-		tools: []internalToolT{},
+		name:      name,
+		tools:     []internalToolT{},
+		resources: []internalResourceT{},
 	}
+}
+
+// SetInstructions is sent to clients on initialize, clients like Claude Code add it to the system prompt of the model.
+// Empty leaves it out.
+func (s *Server) SetInstructions(instructions string) {
+	s.instructions = strings.TrimSpace(instructions)
 }
 
 func AddToolToServer[T any](server *Server, tool Tool[T]) {

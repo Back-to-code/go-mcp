@@ -66,12 +66,13 @@ outer:
 			return res
 		}
 		addErr := func(err error) Res {
+			rpcErr := &Error{Message: err.Error()}
+			errors.As(err, &rpcErr)
+
 			res := Res{
 				Jsonrpc: Jsonrpc,
 				Id:      req.Id,
-				Error: &Error{
-					Message: err.Error(),
-				},
+				Error:   rpcErr,
 			}
 			resp = append(resp, res)
 			return res
@@ -84,19 +85,27 @@ outer:
 
 		switch req.Method {
 		case "initialize":
-			return jsonResponse(addResp(M{
-				"protocolVersion": protocolVersion,
-				"capabilities": M{
-					"tools": M{
-						// We do not actually support this, but this might be required by claude??
-						"listChanged": true,
-					},
+			capabilities := M{
+				"tools": M{
+					// We do not actually support this, but this might be required by claude??
+					"listChanged": true,
 				},
+			}
+			if len(s.resources) > 0 {
+				capabilities["resources"] = M{}
+			}
+			result := M{
+				"protocolVersion": protocolVersion,
+				"capabilities":    capabilities,
 				"serverInfo": M{
-					"name":    "test mcp",
+					"name":    s.name,
 					"version": "1.0.0",
 				},
-			}))
+			}
+			if s.instructions != "" {
+				result["instructions"] = s.instructions
+			}
+			return jsonResponse(addResp(result))
 		case "ping":
 			addResp(M{})
 		case "notifications/initialized":
@@ -174,8 +183,28 @@ outer:
 			})
 		case "resources/list":
 			addResp(M{
-				"resources": []M{},
+				"resources": s.listResources(false),
 			})
+		case "resources/templates/list":
+			addResp(M{
+				"resourceTemplates": s.listResources(true),
+			})
+		case "resources/read":
+			var params struct {
+				Uri string `json:"uri"`
+			}
+			err := json.Unmarshal(req.Params, &params)
+			if err != nil {
+				addErr(err)
+				continue
+			}
+
+			out, err := s.readResource(params.Uri, ctx)
+			if err != nil {
+				addErr(err)
+				continue
+			}
+			addResp(out)
 		}
 	}
 

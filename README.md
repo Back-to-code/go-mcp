@@ -37,6 +37,47 @@ response := mcpServer.Handle(method /* string */, body /* []byte */, context.Bac
 fmt.Printf("%+v\n", response)
 ```
 
+### Instructions
+
+Instructions tell the model how to use the server as a whole, for example which tool to read first. They are sent
+to the client when it initializes, clients like Claude Code add them to the system prompt of the model.
+
+```go
+mcpServer.SetInstructions("Call read_guide before writing any rules.")
+```
+
+### Resources
+
+Resources are text documents a client can list and read, for example documentation of the tools. Read is called
+with the context passed to `Handle` every time a client reads the resource.
+
+```go
+mcp.AddResourceToServer(mcpServer, mcp.Resource{
+	Uri:         "docs://guide",
+	Name:        "guide",
+	Title:       "Guide",
+	Description: "How to use the tools of this server",
+	MimeType:    "text/markdown",
+	Read: func(ctx context.Context, params map[string]string) (string, error) {
+		return "# Guide", nil
+	},
+})
+```
+
+A uri with `{name}` parameters works like a route: the resource is listed as a template and reads every uri that
+matches it, with the percent decoded value of every parameter in `params`. A parameter matches one path segment. A
+resource without parameters wins from a template, otherwise the first template that was added wins.
+
+```go
+mcp.AddResourceToServer(mcpServer, mcp.Resource{
+	Uri:  "docs://profiles/{id}",
+	Name: "profile",
+	Read: func(ctx context.Context, params map[string]string) (string, error) {
+		return "Profile " + params["id"], nil
+	},
+})
+```
+
 ### Tool name inside a handler
 
 The context passed to a tool handler carries the name of the tool that was called.
