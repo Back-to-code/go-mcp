@@ -46,6 +46,24 @@ to the client when it initializes, clients like Claude Code add them to the syst
 mcpServer.SetInstructions("Call read_guide before writing any rules.")
 ```
 
+### Resources
+
+Resources are text documents a client can list and read, for example documentation of the tools. Read is called
+with the context passed to `Handle` every time a client reads the resource.
+
+```go
+mcp.AddResourceToServer(mcpServer, mcp.Resource{
+	Uri:         "docs://guide",
+	Name:        "guide",
+	Title:       "Guide",
+	Description: "How to use the tools of this server",
+	MimeType:    "text/markdown",
+	Read: func(ctx context.Context) (string, error) {
+		return "# Guide", nil
+	},
+})
+```
+
 ### Tool name inside a handler
 
 The context passed to a tool handler carries the name of the tool that was called.

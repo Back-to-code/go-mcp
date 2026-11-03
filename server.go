@@ -13,6 +13,7 @@ type Server struct {
 	name         string
 	instructions string
 	tools        []internalToolT
+	resources    []internalResourceT
 }
 
 type internalToolT struct {
@@ -34,8 +35,9 @@ type Tool[T any] struct {
 
 func NewServer(name string) *Server {
 	return &Server{
-		name:  name,
-		tools: []internalToolT{},
+		name:      name,
+		tools:     []internalToolT{},
+		resources: []internalResourceT{},
 	}
 }
 

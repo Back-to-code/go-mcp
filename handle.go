@@ -66,12 +66,13 @@ outer:
 			return res
 		}
 		addErr := func(err error) Res {
+			rpcErr := &Error{Message: err.Error()}
+			errors.As(err, &rpcErr)
+
 			res := Res{
 				Jsonrpc: Jsonrpc,
 				Id:      req.Id,
-				Error: &Error{
-					Message: err.Error(),
-				},
+				Error:   rpcErr,
 			}
 			resp = append(resp, res)
 			return res
@@ -84,14 +85,18 @@ outer:
 
 		switch req.Method {
 		case "initialize":
+			capabilities := M{
+				"tools": M{
+					// We do not actually support this, but this might be required by claude??
+					"listChanged": true,
+				},
+			}
+			if len(s.resources) > 0 {
+				capabilities["resources"] = M{}
+			}
 			result := M{
 				"protocolVersion": protocolVersion,
-				"capabilities": M{
-					"tools": M{
-						// We do not actually support this, but this might be required by claude??
-						"listChanged": true,
-					},
-				},
+				"capabilities":    capabilities,
 				"serverInfo": M{
 					"name":    s.name,
 					"version": "1.0.0",
@@ -178,8 +183,28 @@ outer:
 			})
 		case "resources/list":
 			addResp(M{
-				"resources": []M{},
+				"resources": s.resources,
 			})
+		case "resources/templates/list":
+			addResp(M{
+				"resourceTemplates": []M{},
+			})
+		case "resources/read":
+			var params struct {
+				Uri string `json:"uri"`
+			}
+			err := json.Unmarshal(req.Params, &params)
+			if err != nil {
+				addErr(err)
+				continue
+			}
+
+			out, err := s.readResource(params.Uri, ctx)
+			if err != nil {
+				addErr(err)
+				continue
+			}
+			addResp(out)
 		}
 	}
 
