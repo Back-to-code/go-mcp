@@ -37,6 +37,15 @@ response := mcpServer.Handle(method /* string */, body /* []byte */, context.Bac
 fmt.Printf("%+v\n", response)
 ```
 
+### Instructions
+
+Instructions tell the model how to use the server as a whole, for example which tool to read first. They are sent
+to the client when it initializes, clients like Claude Code add them to the system prompt of the model.
+
+```go
+mcpServer.SetInstructions("Call read_guide before writing any rules.")
+```
+
 ### Tool name inside a handler
 
 The context passed to a tool handler carries the name of the tool that was called.

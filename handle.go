@@ -84,7 +84,7 @@ outer:
 
 		switch req.Method {
 		case "initialize":
-			return jsonResponse(addResp(M{
+			result := M{
 				"protocolVersion": protocolVersion,
 				"capabilities": M{
 					"tools": M{
@@ -93,10 +93,14 @@ outer:
 					},
 				},
 				"serverInfo": M{
-					"name":    "test mcp",
+					"name":    s.name,
 					"version": "1.0.0",
 				},
-			}))
+			}
+			if s.instructions != "" {
+				result["instructions"] = s.instructions
+			}
+			return jsonResponse(addResp(result))
 		case "ping":
 			addResp(M{})
 		case "notifications/initialized":
