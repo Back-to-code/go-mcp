@@ -58,8 +58,22 @@ mcp.AddResourceToServer(mcpServer, mcp.Resource{
 	Title:       "Guide",
 	Description: "How to use the tools of this server",
 	MimeType:    "text/markdown",
-	Read: func(ctx context.Context) (string, error) {
+	Read: func(ctx context.Context, params map[string]string) (string, error) {
 		return "# Guide", nil
+	},
+})
+```
+
+A uri with `{name}` parameters works like a route: the resource is listed as a template and reads every uri that
+matches it, with the percent decoded value of every parameter in `params`. A parameter matches one path segment. A
+resource without parameters wins from a template, otherwise the first template that was added wins.
+
+```go
+mcp.AddResourceToServer(mcpServer, mcp.Resource{
+	Uri:  "docs://profiles/{id}",
+	Name: "profile",
+	Read: func(ctx context.Context, params map[string]string) (string, error) {
+		return "Profile " + params["id"], nil
 	},
 })
 ```

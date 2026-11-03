@@ -183,11 +183,11 @@ outer:
 			})
 		case "resources/list":
 			addResp(M{
-				"resources": s.resources,
+				"resources": s.listResources(false),
 			})
 		case "resources/templates/list":
 			addResp(M{
-				"resourceTemplates": []M{},
+				"resourceTemplates": s.listResources(true),
 			})
 		case "resources/read":
 			var params struct {
